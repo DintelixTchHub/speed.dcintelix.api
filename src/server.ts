@@ -47,6 +47,9 @@ app.get("/health", (_request, response) => {
   response.set("Cache-Control", "no-store").json({ success: true });
 });
 
+app.use("/", (_request, response) => {
+  response.status(200).set("Cache-Control", "no-store").json({ success: true, message: "Speed-test API is running" });
+});
 app.use("/api/speedtest", speedTestRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/isps", ispRoutes);
