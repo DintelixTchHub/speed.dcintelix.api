@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SpeedTest {
+  id          String   @id @default(cuid())
+  download    Float
+  upload      Float
+  ping        Float
+  jitter      Float
+  packetLoss  Float?   @default(0)
+  isp         String?
+  asn         Int?
+  country     String?
+  province    String?
+  district    String?
+  city        String?
+  latitude    Float?
+  longitude   Float?
+  coordinates Unsupported("geography(Point, 4326)")?
+  browser     String?
+  os          String?  @map("operatingSystem")
+  deviceType  String?
+  networkType String?
+  server      String?
+  timestamp   DateTime @default(now())
+  ipHash      String?
+
+  location    Location? @relation(fields: [locationId], references: [id])
+  locationId  String?
+  ispRecord   ISP?      @relation(fields: [ispId], references: [id])
+  ispId       String?
+  serverRecord Server?  @relation(fields: [serverId], references: [id])
+  serverId    String?
+
+  @@index([timestamp])
+  @@index([timestamp, isp])
+  @@index([timestamp, country])
+  @@index([timestamp, deviceType])
+  @@index([coordinates], type: Gist, map: "SpeedTest_coordinates_gist_idx")
+  @@index([download])
+  @@index([upload])
+  @@index([ping])
+  @@index([country])
+  @@index([city])
+  @@index([isp])
+  @@index([server])
+  @@index([networkType])
+}
+
+model ISP {
+  id          String      @id @default(cuid())
+  name        String      @unique
+  asn         Int?
+  country     String?
+  speedTests  SpeedTest[]
+
+  @@index([name])
+}
+
+model Location {
+  id        String      @id @default(cuid())
+  country   String?
+  province  String?
+  district  String?
+  city      String?
+  latitude  Float?
+  longitude Float?
+  speedTests SpeedTest[]
+
+  @@index([country])
+  @@index([city])
+  @@index([province])
+  @@unique([country, province, district, city, latitude, longitude])
+}
+
+model Server {
+  id          String      @id @default(cuid())
+  name        String
+  host        String?
+  location    String?
+  speedTests  SpeedTest[]
+
+  @@index([name])
+  @@index([location])
+  @@unique([name, host])
+}
