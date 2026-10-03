@@ -59,9 +59,7 @@ export async function resultController(
       deviceType: payload.deviceType ?? null,
       networkType: payload.networkType ?? null,
       server:
-        payload.server?.name?.trim() ||
-        process.env.SPEEDTEST_SERVER_NAME ||
-        "DCintelix Kigali",
+        payload.server?.name?.trim() ?? null,
       ipAddress: request.ip ?? null,
       timestamp: payload.timestamp ?? new Date(),
     });
