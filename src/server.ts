@@ -36,9 +36,8 @@ if (trustProxySetting && trustProxySetting.toLowerCase() !== "false") {
 }
 app.use(
   cors({
-    origin: allowedOrigins,
-    methods: ["GET", "POST", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Cache-Control", "Pragma"],
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   }),
 );
 app.use(express.json({ limit: "100kb" }));
