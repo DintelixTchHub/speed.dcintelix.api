@@ -13,6 +13,17 @@ The API listens on `http://localhost:4000` by default. Set `PORT` to change the 
 
 Set `DATABASE_URL` to the Prisma Accelerate URL for application queries. Set `DIRECT_URL` to the underlying PostgreSQL connection string for migrations; `npm run db:deploy` uses `DIRECT_URL` when present.
 
+For Render, use `npm install && npm run build:deploy` as the build command. This ensures migrations run only after the TypeScript build succeeds.
+
+The `20261002010000_add_postgis_coordinates` migration was changed to clean up any partially applied PostGIS objects. Because the database has recorded an earlier attempt as failed, resolve that attempt once against the intended production database before redeploying:
+
+```bash
+npx prisma migrate resolve --rolled-back 20261002010000_add_postgis_coordinates
+npm run db:deploy
+```
+
+Run these commands in an environment with `DIRECT_URL` set to the intended database's direct PostgreSQL connection string. Resolving the failed attempt as rolled back allows Prisma to rerun the idempotent cleanup migration; do not run this against a different database.
+
 Routes:
 
 - `GET /health` reports whether the API is running.
