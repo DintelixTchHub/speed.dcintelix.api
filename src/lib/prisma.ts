@@ -1,29 +1,21 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import { withAccelerate } from "@prisma/extension-accelerate";
 
-const globalForPrisma = globalThis as unknown as {
-  prisma?: PrismaClient;
-};
-
-const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
 const poolMax = Number.parseInt(process.env.DB_POOL_MAX ?? "10", 10);
 const poolIdleTimeoutMs = Number.parseInt(process.env.DB_POOL_IDLE_TIMEOUT_MS ?? "30000", 10);
 const poolConnectionTimeoutMs = Number.parseInt(process.env.DB_POOL_CONNECTION_TIMEOUT_MS ?? "5000", 10);
+const runtimeUrl = process.env.DATABASE_URL ?? process.env.DIRECT_URL;
 
-if (!process.env.DATABASE_URL && connectionString) {
-  process.env.DATABASE_URL = connectionString;
-}
+function createPrisma() {
+  if (runtimeUrl?.startsWith("prisma://")) {
+    return new PrismaClient({ accelerateUrl: runtimeUrl }).$extends(withAccelerate());
+  }
 
-if (!process.env.DIRECT_URL && connectionString) {
-  process.env.DIRECT_URL = connectionString;
-}
-
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    adapter: connectionString
+  return new PrismaClient({
+    adapter: runtimeUrl
       ? new PrismaPg({
-          connectionString,
+          connectionString: runtimeUrl,
           max: Number.isInteger(poolMax) && poolMax > 0 ? poolMax : 10,
           idleTimeoutMillis: Number.isInteger(poolIdleTimeoutMs) && poolIdleTimeoutMs > 0
             ? poolIdleTimeoutMs
@@ -34,6 +26,12 @@ export const prisma =
         })
       : undefined,
   });
+}
+
+type PrismaInstance = ReturnType<typeof createPrisma>;
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaInstance };
+
+export const prisma = globalForPrisma.prisma ?? createPrisma();
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

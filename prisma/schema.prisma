@@ -21,7 +21,6 @@ model SpeedTest {
   city        String?
   latitude    Float?
   longitude   Float?
-  coordinates Unsupported("geography(Point, 4326)")?
   browser     String?
   os          String?  @map("operatingSystem")
   deviceType  String?
@@ -41,7 +40,6 @@ model SpeedTest {
   @@index([timestamp, isp])
   @@index([timestamp, country])
   @@index([timestamp, deviceType])
-  @@index([coordinates], type: Gist, map: "SpeedTest_coordinates_gist_idx")
   @@index([download])
   @@index([upload])
   @@index([ping])

@@ -11,6 +11,8 @@ npm run dev
 
 The API listens on `http://localhost:4000` by default. Set `PORT` to change the port and `CORS_ORIGIN` to a comma-separated list of allowed frontend origins. The default CORS policy permits any origin.
 
+Set `DATABASE_URL` to the Prisma Accelerate URL for application queries. Set `DIRECT_URL` to the underlying PostgreSQL connection string for migrations; `npm run db:deploy` uses `DIRECT_URL` when present.
+
 Routes:
 
 - `GET /health` reports whether the API is running.
